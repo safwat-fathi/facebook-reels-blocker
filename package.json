@@ -1,0 +1,21 @@
+{
+	"name": "facebook-reels-blocker",
+	"version": "0.0.1",
+	"description": "web extension to block facebook reels in your feed",
+	"scripts": {
+		"build": "tsc && npm run copy-files",
+		"build:chrome": "tsc && npm run copy-files:chrome",
+		"build:firefox": "tsc && npm run copy-files:firefox",
+		"copy-files": "npm run copy-files:chrome && npm run copy-files:firefox",
+		"copy-files:chrome": "mkdir -p dist/chrome && cp src/manifest.v3.json dist/chrome/manifest.json && cp popup.html dist/chrome/ && mkdir -p dist/chrome/icons && cp dist/*.js dist/chrome/",
+		"copy-files:firefox": "mkdir -p dist/firefox && cp src/manifest.v2.json dist/firefox/manifest.json && cp popup.html dist/firefox/ && mkdir -p dist/firefox/icons && cp dist/*.js dist/firefox/",
+		"watch": "tsc --watch"
+	},
+	"author": "Safwat Fathi",
+	"license": "ISC",
+	"devDependencies": {
+		"@types/chrome": "^0.0.313",
+		"@types/firefox-webext-browser": "^120.0.4",
+		"typescript": "^5.8.3"
+	}
+}

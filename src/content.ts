@@ -143,6 +143,30 @@ class FacebookReelsBlocker {
 			subtree: true,
 		});
 	}
+
+	private blockMobileReelsByHeader(): void {
+		const REELS_TITLES = ["Reels", "ريلز"];
+
+		// Find all span.f2 containing "Reels"
+		document.querySelectorAll("span.f2").forEach(span => {
+			const text = span.textContent?.trim();
+			if (text && REELS_TITLES.includes(text)) {
+				let current = span as HTMLElement | null;
+				while (current && current.parentElement) {
+					current = current.parentElement;
+					if (
+						current.matches(
+							'div[data-mcomponent="MContainer"][data-type="container"]'
+						) &&
+						current.style.height &&
+						parseInt(current.style.height) > 300
+					) {
+						this.hideElement(current as HTMLElement);
+					}
+				}
+			}
+		});
+	}
 }
 
 // Initialize the blocker when the content script loads

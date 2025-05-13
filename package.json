@@ -1,6 +1,6 @@
 {
 	"name": "facebook-reels-blocker",
-	"version": "0.0.1",
+	"version": "0.1.3",
 	"description": "web extension to block facebook reels in your feed",
 	"scripts": {
 		"build": "tsc && npm run copy-files && rm dist/*.js dist/*.js.map",

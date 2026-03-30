@@ -1,35 +1,31 @@
-// src/background.ts
-// Detect which browser API to use
-const browserAPI = typeof browser !== "undefined" ? browser : chrome;
+const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
 
-browserAPI.runtime.onInstalled.addListener(() => {
-	// Set default settings
-	browserAPI.storage.sync.set({ enabled: true });
+browserAPI.runtime.onInstalled.addListener(async () => {
+	try {
+		await browserAPI.storage.sync.set({ enabled: true });
+		const result = await browserAPI.storage.sync.get("enabled");
+	} catch (e) {
+		console.error("storage.sync error:", e);
+	}
 });
 
-// For Chrome, we can use the scripting API
-// For Firefox, we'll rely on the content_scripts declaration in manifest.json
-if (typeof chrome !== "undefined" && chrome.scripting) {
-	// This code will only run in Chrome where the scripting API is available
-	chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-		if (changeInfo.status === "complete" && tab.url?.includes("facebook.com")) {
-			chrome.scripting
-				.executeScript({
-					target: { tabId },
-					files: ["content.js"],
-				})
-				.catch(error => console.error("Error injecting script: ", error));
+// Block Reels URLs natively
+browserAPI.tabs.onUpdated.addListener(
+	(tabId: number, changeInfo: any, tab: any) => {
+		if (changeInfo.url) {
+			const url = changeInfo.url;
+			if (
+				url.includes("facebook.com/reel/") ||
+				url.includes("facebook.com/reels/")
+			) {
+				browserAPI.storage.sync.get("enabled").then((result: any) => {
+					if (result.enabled !== false) {
+						(browserAPI as any).tabs.update(tabId, {
+							url: "https://www.facebook.com/",
+						});
+					}
+				});
+			}
 		}
-	});
-} else if (typeof browser !== "undefined") {
-	// For Firefox, we'll use the tabs.executeScript API which is supported in older versions
-	browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-		if (changeInfo.status === "complete" && tab.url?.includes("facebook.com")) {
-			browser.tabs
-				.executeScript(tabId, {
-					file: "content.js",
-				})
-				.catch(error => console.error("Error injecting script: ", error));
-		}
-	});
-}
+	},
+);

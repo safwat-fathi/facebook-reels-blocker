@@ -4,7 +4,7 @@
 	"name": "Facebook Reels Blocker",
 	"version": "0.0.1",
 	"description": "Blocks Facebook Reels from appearing in your feed",
-	"permissions": ["scripting", "storage"],
+	"permissions": ["scripting", "storage", "tabs", "webNavigation"],
 	"host_permissions": ["*://*.facebook.com/*"],
 	"action": {
 		"default_popup": "popup.html"

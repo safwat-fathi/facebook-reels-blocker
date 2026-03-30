@@ -1,10 +1,8 @@
-// src/popup.ts
 document.addEventListener("DOMContentLoaded", () => {
 	const toggleSwitch = document.getElementById(
 		"toggleReelsBlock"
 	) as HTMLInputElement;
-	  const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
-
+	const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
 
 	// Load current state
 	browserAPI.storage.sync.get("enabled", result => {

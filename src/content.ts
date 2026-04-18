@@ -283,7 +283,8 @@ class FacebookReelsBlocker {
 		}
 	}
 }
-browser.storage.sync.get("enabled").then(r => {
+const extensionBrowserAPI = typeof chrome !== "undefined" ? chrome : browser;
+extensionBrowserAPI.storage.sync.get("enabled").then((r: any) => {
 	// Initialize the blocker when the content script loads
 	if (r.enabled) {
 		console.log("Initializing extension");

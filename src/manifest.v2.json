@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Facebook Reels Blocker",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"description": "Blocks Facebook Reels from appearing in your feed",
 
 	"permissions": ["storage", "tabs", "webNavigation", "*://*.facebook.com/*"],

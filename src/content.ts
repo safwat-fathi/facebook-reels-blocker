@@ -11,13 +11,10 @@ class FacebookReelsBlocker {
 		'a[href*="facebook.com/reel"]',
 
 		// Mobile selectors
-		'div[data-mcomponent="MContainer"]',
-		'div[data-actual-height="460"]',
-		'div[style*="height:460px"]',
-		"div[data-tracking-duration-id]",
-		"div[data-on-visible-action-id]",
-		"h2:has(span.f2)",
 		'div[data-sigil*="reel"]',
+		'div[data-store*="reel"]',
+		'div[aria-label*="Reel"]',
+		'div[aria-label*="reel"]',
 	];
 
 	constructor() {
@@ -72,8 +69,8 @@ class FacebookReelsBlocker {
 		const REELS_HEADERS = ["Reels", "ريلز", "릴스", "リール", "短视频"];
 
 		REELS_HEADERS.forEach(headerText => {
-			// Use more robust XPath search
-			const xpath = `//*[@class='f2' and contains(., '${headerText}')]`;
+			// Targeted XPath for common header tags or elements with specific attributes
+			const xpath = `//h2[contains(., '${headerText}')] | //h3[contains(., '${headerText}')] | //span[text()='${headerText}'] | //div[text()='${headerText}' and @data-mcomponent="TextArea"]`;
 			const headers = document.evaluate(
 				xpath,
 				document,
@@ -84,57 +81,22 @@ class FacebookReelsBlocker {
 
 			for (let i = 0; i < headers.snapshotLength; i++) {
 				const header = headers.snapshotItem(i);
-				if (!(header instanceof HTMLElement)) continue;
-
-				// Traverse up to find container
-				// --- FIX: Initialize container with the starting element ---
-				let container = header;
-
-				for (let j = 0; j < 5; j++) {
-					// Using 'j' to avoid confusion with the outer loop
-					// --- FIX: First, get the parent element ---
-					const parent = container.parentElement;
-
-					// --- FIX: Check if the parent exists before using it ---
-					if (!parent) {
-						console.log("No more parent elements found.");
-						break;
-					}
-
-					console.log(parent); // Now you can safely log the parent
-
-					// Move up the tree for the next iteration
-					container = parent;
+				if (header instanceof HTMLElement) {
+					this.hideElement(header);
 				}
 			}
 		});
 	}
 
 	private blockMobileVideoContainers(): void {
-		// Find all video containers
+		// Find all video containers that explicitly mention reels
 		const videoContainers = document.querySelectorAll(
-			'div[data-actual-height="400"], div[style*="height:400px"]',
+			'div[aria-label*="reel"], div[aria-label*="Reel"], div[data-sigil*="reel"]',
 		);
 
 		videoContainers.forEach(container => {
-			if (!(container instanceof HTMLElement)) return;
-
-			// Find the main reel container (2 levels up)
-			let parent = container.parentElement;
-			for (let i = 0; i < 3; i++) {
-				if (!parent) break;
-
-				// Check for container characteristics
-				const height =
-					parent.getAttribute("data-actual-height") ||
-					parent.style.height ||
-					"";
-
-				if (height.includes("460")) {
-					this.hideElement(parent);
-					break;
-				}
-				parent = parent.parentElement;
+			if (container instanceof HTMLElement) {
+				this.hideElement(container);
 			}
 		});
 	}
@@ -142,15 +104,12 @@ class FacebookReelsBlocker {
 	private hideElement(element: HTMLElement): void {
 		if (!element || element.style.display === "none") return;
 
-		// Special handling for mobile containers
-		if (element.getAttribute("data-mcomponent") === "MContainer") {
-			element.style.display = "none";
-			element.setAttribute("data-reels-blocked", "true");
-			return;
-		}
-
 		// Find the closest meaningful parent
-		const container = this.findMobileContainer(element) || element;
+		const container =
+			this.findMobileContainer(element) ||
+			this.findPostContainer(element) ||
+			element;
+
 		container.style.display = "none";
 		container.setAttribute("data-reels-blocked", "true");
 	}
@@ -159,20 +118,46 @@ class FacebookReelsBlocker {
 		const containerSelectors = [
 			'div[data-mcomponent="MContainer"]',
 			'div[data-actual-height="460"]',
+			'div[data-actual-height="464"]',
 			'div[style*="height:460px"]',
+			'div[style*="height:464px"]',
+			'div[data-sigil="mtop-section"]',
+			'div[data-sigil="mComposite"]',
 			"div[data-tracking-duration-id]",
 		];
 
-		for (let el: HTMLElement | null = element; el; el = el.parentElement) {
+		let bestCandidate: HTMLElement | null = null;
+		let currentEl: HTMLElement | null = element;
+
+		// Limit search to 6 levels to avoid hiding the main page wrapper
+		for (let i = 0; i < 6; i++) {
+			if (!currentEl || currentEl.tagName === "BODY") break;
+
 			for (const selector of containerSelectors) {
-				if (el.matches(selector)) {
-					return el;
+				if (currentEl.matches(selector)) {
+					const heightAttr = currentEl.getAttribute("data-actual-height");
+					const height = heightAttr ? parseInt(heightAttr) : 0;
+					const sigil = currentEl.getAttribute("data-sigil") || "";
+
+					// Specifically target the tray heights or section sigils
+					if (
+						height === 460 ||
+						height === 464 ||
+						(height > 300 &&
+							(sigil.includes("mtop") || sigil.includes("mComposite")))
+					) {
+						return currentEl;
+					}
+
+					// Fallback to the first MContainer we find
+					if (!bestCandidate && currentEl.getAttribute("data-mcomponent") === "MContainer") {
+						bestCandidate = currentEl;
+					}
 				}
 			}
-
-			if (el.tagName === "BODY") break;
+			currentEl = currentEl.parentElement;
 		}
-		return null;
+		return bestCandidate;
 	}
 
 	private startBlocking(): void {
@@ -232,9 +217,10 @@ class FacebookReelsBlocker {
 	private findPostContainer(element: HTMLElement): HTMLElement | null {
 		// Try to find the parent post container
 		const containerSelectors = [
-			'div[data-pagelet="FeedUnit"]',
-			'div[role="article"]',
 			'div[data-pagelet^="FeedUnit"]',
+			'div[role="article"]',
+			'div[data-pagelet^="Reels"]',
+			'div[data-pagelet="Stories"]',
 		];
 
 		for (
@@ -246,6 +232,11 @@ class FacebookReelsBlocker {
 				if (currentElement.matches(selector)) {
 					return currentElement;
 				}
+			}
+
+			// Detect if we hit a generic feed list container wrapper
+			if (currentElement.parentElement && (currentElement.parentElement.getAttribute('role') === 'feed' || currentElement.parentElement.getAttribute('role') === 'list')) {
+				return currentElement;
 			}
 
 			// Prevent going too far up the DOM

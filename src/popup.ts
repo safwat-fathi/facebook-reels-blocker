@@ -1,25 +1,29 @@
-document.addEventListener("DOMContentLoaded", () => {
-	const toggleSwitch = document.getElementById(
-		"toggleReelsBlock"
-	) as HTMLInputElement;
-	const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
+import { api, getSettings, type Settings } from "./shared";
 
-	// Load current state
-	browserAPI.storage.sync.get("enabled", result => {
-		toggleSwitch.checked = result.enabled !== undefined ? result.enabled : true;
-	});
+const inputs = document.querySelectorAll<HTMLInputElement>("input[data-key]");
+const master = document.querySelector<HTMLInputElement>('input[data-key="enabled"]')!;
+const grant = document.getElementById("grant") as HTMLButtonElement;
+const origins = api.runtime.getManifest().host_permissions ?? [];
 
-	// Save state when toggle is clicked
-	toggleSwitch.addEventListener("change", () => {
-		browserAPI.storage.sync.set({ enabled: toggleSwitch.checked });
+const syncDisabled = () =>
+	inputs.forEach(i => (i.disabled = i !== master && !master.checked));
 
-		// Notify active tab
-		browserAPI.tabs.query({ active: true, currentWindow: true }, tabs => {
-			if (tabs[0]?.id) {
-				browserAPI.tabs.sendMessage(tabs[0].id, {
-					action: toggleSwitch.checked ? "start" : "stop",
-				});
-			}
-		});
-	});
+getSettings().then(s => {
+	inputs.forEach(i => (i.checked = s[i.dataset.key as keyof Settings]));
+	syncDisabled();
 });
+
+inputs.forEach(i =>
+	i.addEventListener("change", () => {
+		api.storage.sync.set({ [i.dataset.key!]: i.checked });
+		syncDisabled();
+	}),
+);
+
+document.getElementById("version")!.textContent = api.runtime.getManifest().version;
+
+// Some platforms (e.g. Firefox Android MV3) may not grant host access at install.
+api.permissions.contains({ origins }).then(ok => (grant.hidden = ok));
+grant.addEventListener("click", () =>
+	api.permissions.request({ origins }).then(ok => (grant.hidden = ok)),
+);

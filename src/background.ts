@@ -1,31 +1,25 @@
-const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
+import { api, getSettings } from "./shared";
 
-browserAPI.runtime.onInstalled.addListener(async () => {
-	try {
-		await browserAPI.storage.sync.set({ enabled: true });
-		const result = await browserAPI.storage.sync.get("enabled");
-	} catch (e) {
-		console.error("storage.sync error:", e);
-	}
+const REEL_PATH = /^\/(reels?|share\/r)(\/|$)/;
+
+// Full loads and SPA navigations both surface here with `url` (host permission is enough).
+api.tabs.onUpdated.addListener(async (tabId, { url }) => {
+	if (!url) return;
+	const u = new URL(url);
+	const onFacebook = u.hostname === "facebook.com" || u.hostname.endsWith(".facebook.com");
+	if (!onFacebook || !REEL_PATH.test(u.pathname)) return;
+
+	const s = await getSettings();
+	if (s.enabled && s.redirect) api.tabs.update(tabId, { url: new URL("/", u).href });
 });
 
-// Block Reels URLs natively
-browserAPI.tabs.onUpdated.addListener(
-	(tabId: number, changeInfo: any, tab: any) => {
-		if (changeInfo.url) {
-			const url = changeInfo.url;
-			if (
-				url.includes("facebook.com/reel/") ||
-				url.includes("facebook.com/reels/")
-			) {
-				browserAPI.storage.sync.get("enabled").then((result: any) => {
-					if (result.enabled !== false) {
-						(browserAPI as any).tabs.update(tabId, {
-							url: "https://www.facebook.com/",
-						});
-					}
-				});
-			}
-		}
-	},
-);
+// Per-tab blocked-count badge. `action` may be missing/limited on some platforms (e.g. Firefox Android).
+api.runtime.onMessage.addListener((msg, sender) => {
+	const tabId = sender.tab?.id;
+	if (typeof msg?.count !== "number" || tabId === undefined) return;
+	try {
+		Promise.resolve(
+			api.action?.setBadgeText?.({ tabId, text: msg.count ? String(msg.count) : "" }),
+		).catch(() => {});
+	} catch {}
+});

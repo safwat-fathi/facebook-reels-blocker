@@ -1,107 +1,52 @@
-<!-- popup.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <style>
-    body {
-      width: 250px;
-      padding: 16px;
-      font-family: Arial, sans-serif;
-      color: #333;
-    }
-    
-    h1 {
-      font-size: 18px;
-      margin-top: 0;
-      color: #1877f2;
-      margin-bottom: 16px;
-    }
-    
-    .toggle-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    
-    .toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 54px;
-      height: 28px;
-    }
-    
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .3s;
-      border-radius: 28px;
-    }
-    
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 20px;
-      width: 20px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .3s;
-      border-radius: 50%;
-    }
-    
-    input:checked + .slider {
-      background-color: #1877f2;
-    }
-    
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
-    
-    .status {
-      font-size: 14px;
-      font-weight: bold;
-    }
-    
-    .footer {
-      margin-top: 16px;
-      border-top: 1px solid #eee;
-      padding-top: 16px;
-      font-size: 12px;
-      color: #666;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Facebook Reels Blocker</title>
+  <style>
+    :root { color-scheme: light dark; --fg: #333; --muted: #666; --line: #eee; --off: #ccc; --on: #1877f2; }
+    @media (prefers-color-scheme: dark) { :root { --fg: #e4e6eb; --muted: #a8abb2; --line: #3a3b3c; --off: #555; } }
+    body { width: 260px; padding: 16px; margin: 0 auto; font-family: system-ui, Arial, sans-serif; color: var(--fg); box-sizing: content-box; }
+    h1 { font-size: 18px; margin: 0 0 12px; color: var(--on); }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 14px; }
+    .row.master { font-weight: bold; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+    .row.sub { opacity: 1; }
+    .row:has(input:disabled) { opacity: .5; }
+    .switch { position: relative; flex: none; width: 44px; height: 24px; }
+    .switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+    .slider { position: absolute; inset: 0; background: var(--off); border-radius: 24px; transition: .2s; pointer-events: none; }
+    .slider::before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+    input:checked + .slider { background: var(--on); }
+    input:checked + .slider::before { transform: translateX(20px); }
+    input:focus-visible + .slider { outline: 2px solid var(--on); outline-offset: 2px; }
+    #grant { width: 100%; margin: 8px 0; padding: 8px; font: inherit; }
+    .footer { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 12px; font-size: 12px; color: var(--muted); }
+  </style>
 </head>
 <body>
   <h1>Facebook Reels Blocker</h1>
-  
-  <div class="toggle-container">
-    <span class="status">Block Reels:</span>
-    <label class="toggle-switch">
-      <input type="checkbox" id="toggleReelsBlock" checked>
-      <span class="slider"></span>
-    </label>
-  </div>
-  
-  <p>Toggle the switch to enable or disable Facebook Reels blocking.</p>
-  
-  <div class="footer">
-    <p>Facebook Reels Blocker v0.2.0</p>
-  </div>
-  
+
+  <button id="grant" hidden>Grant access to facebook.com</button>
+
+  <label class="row master">Block Reels
+    <span class="switch"><input type="checkbox" data-key="enabled" checked><span class="slider"></span></span>
+  </label>
+  <label class="row sub">Reels in feed &amp; menus
+    <span class="switch"><input type="checkbox" data-key="reels" checked><span class="slider"></span></span>
+  </label>
+  <label class="row sub">Redirect Reel pages
+    <span class="switch"><input type="checkbox" data-key="redirect" checked><span class="slider"></span></span>
+  </label>
+  <label class="row sub">Hide Stories
+    <span class="switch"><input type="checkbox" data-key="stories"><span class="slider"></span></span>
+  </label>
+  <label class="row sub">Hide Suggested for you
+    <span class="switch"><input type="checkbox" data-key="suggested"><span class="slider"></span></span>
+  </label>
+
+  <div class="footer">Facebook Reels Blocker v<span id="version"></span></div>
+
   <script src="popup.js"></script>
 </body>
 </html>

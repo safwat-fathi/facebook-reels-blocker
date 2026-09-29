@@ -17,5 +17,9 @@
 		"@types/chrome": "^0.0.313",
 		"@types/firefox-webext-browser": "^120.0.4",
 		"typescript": "^5.8.3"
+	},
+	"dependencies": {
+		"@remotion/cli": "4.0.529",
+		"remotion": "4.0.529"
 	}
 }

@@ -21,13 +21,19 @@ export const PopupModal: React.FC<PopupModalProps> = ({
   // Switch animation
   const switchSliderX = isToggled ? 28 : 4;
   const switchBg = isToggled ? "#1877f2" : "#475569";
-  const switchShadow = isToggled
-    ? "0 0 16px rgba(24, 119, 242, 0.8)"
-    : "none";
+  const switchShadow = isToggled ? "0 0 16px rgba(24, 119, 242, 0.8)" : "none";
 
   // Cursor position interpolation based on cursorProgress (0 to 1)
-  const cursorX = interpolate(cursorProgress, [0, 0.6, 0.8, 1], [280, 215, 215, 260]);
-  const cursorY = interpolate(cursorProgress, [0, 0.6, 0.8, 1], [220, 85, 85, 140]);
+  const cursorX = interpolate(
+    cursorProgress,
+    [0, 0.6, 0.8, 1],
+    [280, 215, 215, 260],
+  );
+  const cursorY = interpolate(
+    cursorProgress,
+    [0, 0.6, 0.8, 1],
+    [220, 85, 85, 140],
+  );
   const isClicking = cursorProgress >= 0.75 && cursorProgress <= 0.88;
 
   return (
@@ -39,7 +45,8 @@ export const PopupModal: React.FC<PopupModalProps> = ({
         backdropFilter: "blur(20px)",
         borderRadius: 16,
         padding: "24px 22px",
-        boxShadow: "0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.14)",
+        boxShadow:
+          "0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.14)",
         fontFamily,
         color: "#F8FAFC",
         scale: scale,
@@ -82,8 +89,12 @@ export const PopupModal: React.FC<PopupModalProps> = ({
           padding: "14px 16px",
           backgroundColor: "rgba(30, 41, 59, 0.7)",
           borderRadius: 12,
-          border: isToggled ? "1px solid rgba(24, 119, 242, 0.5)" : "1px solid rgba(255, 255, 255, 0.08)",
-          boxShadow: isToggled ? "inset 0 0 20px rgba(24, 119, 242, 0.15)" : "none",
+          border: isToggled
+            ? "1px solid rgba(24, 119, 242, 0.5)"
+            : "1px solid rgba(255, 255, 255, 0.08)",
+          boxShadow: isToggled
+            ? "inset 0 0 20px rgba(24, 119, 242, 0.15)"
+            : "none",
           marginBottom: 16,
         }}
       >
@@ -138,7 +149,8 @@ export const PopupModal: React.FC<PopupModalProps> = ({
           color: "#94A3B8",
         }}
       >
-        Toggle the switch to instantly hide or show Facebook Reels in your timeline.
+        Toggle the switch to instantly hide or show Facebook Reels in your
+        timeline.
       </p>
 
       {/* Footer */}
@@ -153,7 +165,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
           color: "#64748B",
         }}
       >
-        <span>v0.2.0 • Safwat Fathi</span>
+        <span>v0.3.0 • Safwat Fathi</span>
         <span
           style={{
             display: "inline-block",

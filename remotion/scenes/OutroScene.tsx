@@ -37,11 +37,7 @@ export const OutroScene: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
-  const ctaPulse = interpolate(
-    Math.sin(frame * 0.12),
-    [-1, 1],
-    [0.98, 1.02]
-  );
+  const ctaPulse = interpolate(Math.sin(frame * 0.12), [-1, 1], [0.98, 1.02]);
 
   // Badges entrance
   const badgesOpacity = interpolate(frame, [38, 55], [0, 1], {
@@ -71,7 +67,8 @@ export const OutroScene: React.FC = () => {
           width: 800,
           height: 800,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(24, 119, 242, 0.25) 0%, rgba(0, 229, 255, 0.08) 50%, transparent 75%)",
+          background:
+            "radial-gradient(circle, rgba(24, 119, 242, 0.25) 0%, rgba(0, 229, 255, 0.08) 50%, transparent 75%)",
           filter: "blur(60px)",
           pointerEvents: "none",
         }}
@@ -154,7 +151,8 @@ export const OutroScene: React.FC = () => {
             fontSize: 30,
             fontWeight: 800,
             letterSpacing: "-0.01em",
-            boxShadow: "0 20px 50px rgba(24, 119, 242, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.3)",
+            boxShadow:
+              "0 20px 50px rgba(24, 119, 242, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.3)",
           }}
         >
           <span>Available for Chrome & Firefox</span>
@@ -230,7 +228,7 @@ export const OutroScene: React.FC = () => {
       >
         <span>Safwat Fathi</span>
         <span style={{ margin: "0 8px" }}>•</span>
-        <span>facebook-reels-blocker v0.2.0</span>
+        <span>facebook-reels-blocker v0.3.0</span>
         <span style={{ margin: "0 8px" }}>•</span>
         <span>github.com/safwat-fathi/facebook-reels-blocker</span>
       </div>

@@ -76,6 +76,16 @@ function postContainer(el: HTMLElement): HTMLElement | null {
 	return null;
 }
 
+// Newer feed markup carries no role/pagelet markers: a unit is the child of the first ancestor with several tall, rendered children.
+// ponytail: layout-based (height > 150, 3 siblings); swap for a real marker if Facebook ever adds one.
+function feedChild(el: HTMLElement): HTMLElement | null {
+	for (let cur = el; cur.parentElement && cur.tagName !== "BODY"; cur = cur.parentElement) {
+		let tall = 0;
+		for (const c of cur.parentElement.children) if (c.getBoundingClientRect().height > 150 && ++tall === 3) return cur;
+	}
+	return null;
+}
+
 function byText(doc: Document, texts: string[]): HTMLElement[] {
 	// texts are constants, so interpolating them into XPath is safe.
 	const xpath = texts
@@ -92,7 +102,8 @@ function byText(doc: Document, texts: string[]): HTMLElement[] {
 export function scan(doc: Document, t: Toggles): number {
 	const mark = (els: Iterable<HTMLElement>, section: Section, resolve: (el: HTMLElement) => HTMLElement | null) => {
 		for (const el of els) {
-			if (el.closest(`[${ATTR}="${section}"]`)) continue;
+			// Notification links (notif_id) can point at reels, but climbing from one hides the whole notifications list.
+			if (el.closest(`[${ATTR}="${section}"],a[href*="notif_id="]`)) continue;
 			resolve(el)?.setAttribute(ATTR, section);
 		}
 	};
@@ -103,7 +114,7 @@ export function scan(doc: Document, t: Toggles): number {
 		mark(byText(doc, REEL_HEADERS), "reels", reelContainer);
 	}
 	if (t.stories) mark(doc.querySelectorAll<HTMLElement>(STORIES_SELECTORS), "stories", soleWrapper);
-	if (t.suggested) mark(byText(doc, SUGGESTED_HEADERS), "suggested", postContainer);
+	if (t.suggested) mark(byText(doc, SUGGESTED_HEADERS), "suggested", el => postContainer(el) ?? feedChild(el));
 
 	const active = SECTIONS.filter(s => t[s]).map(s => `[${ATTR}="${s}"]`).join(",");
 	if (!active) return 0;
